@@ -1,23 +1,23 @@
 import torch
 import torchmetrics
 from app.data.data_preparation import transform_single_image
-from app.model.model import ImageClassifier, device
+from app.model.model import ImageClassifier
 import torchvision
 from torchvision.datasets import ImageFolder
 from environs import Env
 
 env = Env()
 env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
+device = env('DEVICE')
 
 dataset = ImageFolder('./archive/test')
 class_names = dataset.classes
-device = env('DEVICE')
 
 
 
 model = torchvision.models.resnet18(weights=None)
 model.fc = torch.nn.Linear(512, 36)
-model.load_state_dict(torch.load('app/model/model_resnet', map_location='mps'))
+model.load_state_dict(torch.load('app/model/model_resnet_2.0', map_location=device))
 model.to(device)
 
 #data = transform_for_predict('./predict_images', batch_size=1)
