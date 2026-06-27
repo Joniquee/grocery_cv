@@ -1,7 +1,12 @@
 import torch
 import torchmetrics
 from app.data.data_preparation import transform_raw_data
-from app.model.model import ImageClassifier, device
+from app.model.model import ImageClassifier
+from environs import Env
+
+env = Env()
+env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
+device = env('DEVICE')
 
 print('now it is test')
 

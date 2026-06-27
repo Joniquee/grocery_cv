@@ -3,9 +3,11 @@ import torchvision
 from app.data.data_preparation import transform_raw_data
 from tqdm import tqdm
 
-if torch.backends.mps.is_available():
-     device = torch.device('mps')
-else: device = torch.device('cpu')
+from environs import Env
+
+env = Env()
+env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
+device = env('DEVICE')
 
 model = torchvision.models.resnet18(weights = torchvision.models.ResNet18_Weights.DEFAULT)
 

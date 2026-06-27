@@ -29,10 +29,11 @@ class ImageClassifier(nn.Module):
     def forward(self, X):
         return self.model(X)
 
-if torch.backends.mps.is_available():
-    device=torch.device('mps')
-else:
-    device = torch.device('cpu')
+from environs import Env
+
+env = Env()
+env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
+device = env('DEVICE')
 
 print(device)
 

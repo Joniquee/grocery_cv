@@ -4,9 +4,14 @@ from app.data.data_preparation import transform_single_image
 from app.model.model import ImageClassifier, device
 import torchvision
 from torchvision.datasets import ImageFolder
+from environs import Env
+
+env = Env()
+env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
 
 dataset = ImageFolder('./archive/test')
 class_names = dataset.classes
+device = env('DEVICE')
 
 
 
