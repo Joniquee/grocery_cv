@@ -21,20 +21,23 @@ model.fc = nn.Linear(in_features = 512, out_features = 36)
 model.to(device)
 
 dataloader = transform_raw_data('archive/train', 'archive/validation')
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 loss = nn.CrossEntropyLoss().to(device)
-n_epochs = 40
-lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+n_epochs = 50
+lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer=optimizer,
-    milestones=[20,30],
-    gamma=0.3
+    factor=0.1,
+    threshold=0.0015,
+    patience=5
 )
-metric = torchmetrics.Accuracy(task='multiclass', num_classes=36).to(device)
 
-def training(model, optimizer, n_epochs, dataloader_train, dataloader_val, loss, scheduler, metric):
+metric = torchmetrics.Accuracy(task='multiclass', num_classes=36).to(device)
+history = {'epochs': [], 'lr': []}
+def training(model, optimizer, n_epochs, dataloader_train, dataloader_val, loss, scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau, metric, history):
         model.train()
         best_val_loss = float('inf')
         for epoch in (range(n_epochs)):
+            history['epochs'].append(epoch+1)
             total_loss_train = 0
             model.train()
             for X_batch, y_batch in tqdm(dataloader_train):
@@ -53,21 +56,23 @@ def training(model, optimizer, n_epochs, dataloader_train, dataloader_val, loss,
                 metric.update(preds, y_val)
                 cur_loss = loss(preds, y_val)
                 total_loss_val += cur_loss.item()
-            if total_loss_val < best_val_loss:
-                best_val_loss = total_loss_val
-                torch.save(model.state_dict(), f'best_model_epoch_{epoch+1}')
-            scheduler.step()
+            history['lr'].append(scheduler.get_last_lr())
+            print(f'Current LR - {scheduler.get_last_lr()}')
+            scheduler.step(total_loss_val / len(dataloader_val))
             print(f'Epoch - {epoch+1}, Loss - {total_loss_train / len(dataloader_train)}, Val_Loss - {total_loss_val / len(dataloader_val)}, ACC - {metric.compute()}')
             if total_loss_val < best_val_loss:
                 best_val_loss = total_loss_val
-                torch.save(model.state_dict(), f'best_model_epoch_{epoch+1}')
+                torch.save(model.state_dict(), f'best_model_now')
         
         torch.save(model.state_dict(), 'model')
 
 
 
 try:
-  training(model, optimizer=optimizer, n_epochs=n_epochs, dataloader_train=dataloader['train'][0], dataloader_val=dataloader['validation'][0], loss=loss, scheduler=lr_scheduler, metric=metric)
+  training(model, optimizer=optimizer, n_epochs=n_epochs, dataloader_train=dataloader['train'][0], dataloader_val=dataloader['validation'][0], loss=loss, scheduler=lr_scheduler, metric=metric, history=history)
 except KeyboardInterrupt:
   torch.save(model.state_dict(), 'model_interrupted')
   print('Interrupted')
+
+
+print(history)

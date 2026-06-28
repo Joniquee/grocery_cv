@@ -16,12 +16,11 @@ def convert_to_rgb(img):
     return img
 
 
-def transform_raw_data( *args, batch_size=16): # пути на датасеты
+def transform_raw_data( *args, batch_size=16, full_transform=True): # пути на датасеты
 
     path_arr = {}
     target_size = (224, 224)
-    for path in args:
-        toTensor = T.Compose([T.Lambda(convert_to_rgb),
+    toTensor = T.Compose([T.Lambda(convert_to_rgb),
                               T.ToImage(),
                               T.Resize(target_size[0]),
                               T.CenterCrop(target_size),
@@ -31,17 +30,34 @@ def transform_raw_data( *args, batch_size=16): # пути на датасеты
                               T.ToDtype(torch.float32, scale=True),
                               T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
                             )
-        # снача переводит в численное представление, затем делает ресайз до 512 и центрует относительно таргет сайз
-        raw_ds = ImageFolder(path, transform=toTensor)
-        # проходит по всем подпапкам и собирает все в тензоры
-        ds_name = os.path.basename(path)
         
+    toTensor_test = T.Compose([T.Lambda(convert_to_rgb),
+                              T.ToImage(),
+                              T.Resize(target_size[0]),
+                              T.CenterCrop(target_size),
+                              T.ToDtype(torch.float32, scale=True),
+                              T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+                            )
+
+    for path in args:
+        ds_name = os.path.basename(path)
         if ds_name == 'train':
+            raw_ds = ImageFolder(path, transform=toTensor)
             #сразу делит на батчи и шафлит тренировочный датасет
             path_arr[ds_name] = ((DataLoader(raw_ds, batch_size = 16, shuffle=True), ds_name))
             continue
+            
+        if full_transform:
+            raw_ds = ImageFolder(path, transform=toTensor)
+            #сразу делит на батчи и шафлит тренировочный датасет
+            path_arr[ds_name] = ((DataLoader(raw_ds, batch_size = 16), ds_name))
+            continue
+        else:
+            raw_ds = ImageFolder(path, transform=toTensor_test)
+            #сразу делит на батчи и шафлит тренировочный датасет
+            path_arr[ds_name] = ((DataLoader(raw_ds, batch_size = 16), ds_name))
+            continue
 
-        path_arr[ds_name] = ((DataLoader(raw_ds, batch_size = 16), ds_name))
 
     return path_arr
 
