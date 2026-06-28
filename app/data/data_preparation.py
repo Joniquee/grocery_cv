@@ -7,6 +7,7 @@ import torch
 from PIL import Image
 from pathlib import Path
 import numpy as np
+from app.data.RandomBlur import RandomGausiannBlur
 
 def convert_to_rgb(img):
     # Если картинка уже PIL Image и не в режиме RGB, конвертируем
@@ -20,7 +21,16 @@ def transform_raw_data( *args, batch_size=16): # пути на датасеты
     path_arr = {}
     target_size = (224, 224)
     for path in args:
-        toTensor = T.Compose([T.Lambda(convert_to_rgb),T.ToImage(), T.Resize(target_size[0]), T.CenterCrop(target_size), T.ToDtype(torch.float32, scale=True), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+        toTensor = T.Compose([T.Lambda(convert_to_rgb),
+                              T.ToImage(),
+                              T.Resize(target_size[0]),
+                              T.CenterCrop(target_size),
+                              T.RandomRotation(degrees=(-45,45)),
+                              T.RandomPerspective(),
+                              RandomGausiannBlur(kernel_size=15, sigma=2),
+                              T.ToDtype(torch.float32, scale=True),
+                              T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+                            )
         # снача переводит в численное представление, затем делает ресайз до 512 и центрует относительно таргет сайз
         raw_ds = ImageFolder(path, transform=toTensor)
         # проходит по всем подпапкам и собирает все в тензоры
