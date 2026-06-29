@@ -9,8 +9,8 @@ env.read_env()
 
 
 
-BASE_PHOTOS = env('BASE_PHOTOS', default='base_photos/')
-API_URL = env('API_URL', default = 'localhost:8000')
+BASE_PHOTOS = os.environ.get('BASE_PHOTOS', default='streamlit/base_photos/')
+API_URL = os.environ.get('API_URL')
 
 photo = st.file_uploader(
     'Предположим это автоматическое фото с камеры на сканере, но пока загрузите сюда фото продукта', 
