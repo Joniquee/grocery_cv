@@ -13,7 +13,7 @@ device = os.environ.get('DEVICE', 'cpu')
 #dataset = ImageFolder('./archive/test')
 #class_names = dataset.classes
 
-with open('classes.json', 'r') as f:
+with open('app/model/classes.json', 'r') as f:
     class_names_dict = json.load(f)
 
 class_names = class_names_dict['class']
