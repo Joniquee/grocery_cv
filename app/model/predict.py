@@ -5,13 +5,19 @@ from app.model.model import ImageClassifier
 import torchvision
 from torchvision.datasets import ImageFolder
 from environs import Env
+import json
 
 env = Env()
 env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
 device = env('DEVICE')
 
-dataset = ImageFolder('./archive/test')
-class_names = dataset.classes
+#dataset = ImageFolder('./archive/test')
+#class_names = dataset.classes
+
+with open('classes.json', 'r') as f:
+    class_names_dict = json.load(f)
+
+class_names = class_names_dict['class']
 
 
 
