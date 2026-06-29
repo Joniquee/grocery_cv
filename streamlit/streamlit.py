@@ -24,7 +24,7 @@ if st.button('Что это за продукт?'):
     files = {
             "img": (photo.name, photo.getvalue(), photo.type)
         }
-    response = requests.post(f'http://{API_URL}/get_item', files=files)
+    response = requests.post(f'{API_URL}/get_item', files=files)
     body = response.json()
     answers: dict = body['predict']
     print(answers)
