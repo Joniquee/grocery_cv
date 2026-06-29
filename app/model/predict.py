@@ -1,15 +1,14 @@
 import torch
-import torchmetrics
-from app.data.data_preparation import transform_single_image
-from app.model.model import ImageClassifier
+#from app.data.data_preparation import transform_single_image
 import torchvision
-from torchvision.datasets import ImageFolder
+#from torchvision.datasets import ImageFolder
 from environs import Env
 import json
+import os
 
 env = Env()
-env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
-device = env('DEVICE')
+env.read_env()
+device = os.environ.get('DEVICE', 'cpu')
 
 #dataset = ImageFolder('./archive/test')
 #class_names = dataset.classes

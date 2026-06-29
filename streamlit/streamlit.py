@@ -5,7 +5,7 @@ from environs import Env
 import os
 
 env = Env()
-env._load_dotenv('/Users/joniq/Documents/grocery_cv/.env')
+env.read_env()
 
 
 
