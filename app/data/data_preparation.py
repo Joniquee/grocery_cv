@@ -54,7 +54,6 @@ def transform_raw_data( *args, batch_size=16, full_transform=True): # пути �
             continue
         else:
             raw_ds = ImageFolder(path, transform=toTensor_test)
-            #сразу делит на батчи и шафлит тренировочный датасет
             path_arr[ds_name] = ((DataLoader(raw_ds, batch_size = 16), ds_name))
             continue
 
@@ -86,6 +85,10 @@ def transform_single_image(img_path, batch_size=1):
     toTensor = T.Compose([T.Lambda(convert_to_rgb),T.ToImage(), T.Resize(target_size[0]), T.CenterCrop(target_size), T.ToDtype(torch.float32, scale=True), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     
     img = Image.open(img_path)
+    img = Image.open(img_path)
+    img.draft('RGB', (800, 800))   # уменьшает decode-размер ДО полной загрузки в память
+    img.load()
+    img.thumbnail((800, 800)) 
     img_tensor = toTensor(img)
     images.append(img_tensor)
     return DataLoader(images, batch_size=batch_size)
